@@ -1,0 +1,41 @@
+# Privacy & compliance gate — deterministic, runs on every PR.
+#
+# Scans the source roots defined in scripts/compliance/config.mjs for concrete
+# privacy signals that protect the governed-egress guarantee: an un-allowlisted
+# network destination, a server-only secret reachable from the browser bundle,
+# a hardcoded credential, or telemetry outside the analytics seam. A `violation`
+# exits non-zero and FAILS the check; tracked risks (high/medium/low) are scored
+# and surfaced but never block.
+#
+# The policy is data (scripts/compliance/config.mjs + controls.mjs) — this job
+# is dependency-free pure Node 22, so it needs no install and runs in seconds.
+# It is also the deterministic grounding the AI `/compliance` audit reads (see
+# compliance.yml).
+#
+# To make the gate informational instead of blocking, add `--no-fail` to the
+# run line below:
+#   node scripts/compliance/index.mjs --json .compliance/compliance.json --no-fail
+
+name: Compliance gate
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Privacy & compliance gate
+        run: |
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          node scripts/compliance/index.mjs --json .compliance/compliance.json | tee -a "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"

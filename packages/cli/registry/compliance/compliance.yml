@@ -1,0 +1,72 @@
+# Privacy & compliance audit — OpenRouter-powered, opt-in.
+#
+# Opt-in: this does NOT run automatically. Comment "/compliance" on a pull
+# request to trigger an audit, so PRs don't burn tokens unless you ask — exactly
+# like "/review" (code-review.yml).
+#
+# Model selection (routed through OpenRouter):
+#   /compliance            → Claude Opus (capable default; DPO judgement)
+#   /compliance <alias>    → a registered model alias (e.g. gpt, gemini)
+#   /compliance provider/slug → an ad-hoc OpenRouter slug
+#
+# Because it runs on the `issue_comment` event (from the base repo), secrets are
+# available even for PRs from forks — a maintainer just comments "/compliance".
+#
+# Setup: add an OPENROUTER_API_KEY repository secret.
+
+name: Compliance review
+
+on:
+  issue_comment:
+    types: [created]
+
+# One audit per PR; a newer "/compliance" comment cancels an in-flight audit.
+concurrency:
+  group: compliance-review-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  compliance:
+    # Only run for a "/compliance" comment on a pull request (not on plain issues).
+    if: ${{ github.event.issue.pull_request && startsWith(github.event.comment.body, '/compliance') }}
+    runs-on: ubuntu-latest
+    steps:
+      # The auditor code runs from the BASE branch (trusted) — it must not be
+      # PR-authored code, since it executes with the OPENROUTER_API_KEY secret.
+      - uses: actions/checkout@v4
+
+      # The PR's source, checked out read-only into a subdir purely so the
+      # compliance gate can scan it. The analyzer only reads/parses these files
+      # (never executes them), so this is safe for fork PRs too.
+      - name: Check out PR head (source only)
+        uses: actions/checkout@v4
+        with:
+          ref: refs/pull/${{ github.event.issue.number }}/head
+          path: pr-head
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # Deterministic compliance grounding for the PR's source, run from the
+      # trusted base checkout against the PR-head files. --no-fail so a violation
+      # produces the report (and a "fail" verdict) instead of aborting the audit.
+      - name: Generate compliance grounding
+        continue-on-error: true
+        run: node scripts/compliance/index.mjs pr-head --json .compliance/compliance.json --no-fail
+
+      - name: Install audit dependencies
+        working-directory: .github/sentinel
+        run: npm ci --no-audit --no-fund
+
+      - name: Audit pull request
+        working-directory: .github/sentinel
+        run: npm run compliance-review
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          COMPLIANCE_REPORT: ${{ github.workspace }}/.compliance/compliance.json
