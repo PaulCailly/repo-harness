@@ -26,8 +26,13 @@ export async function run(argv: string[]): Promise<number> {
     console.log(USAGE);
     return 0;
   }
-  const mod = await import(`./commands/${cmd}.ts`);
-  return mod.default(rest);
+  switch (cmd) {
+    case "init":
+      return (await import("./commands/init.js")).default(rest);
+    default:
+      console.log(USAGE);
+      return 0;
+  }
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
