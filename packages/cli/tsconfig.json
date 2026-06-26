@@ -2,7 +2,8 @@
   "compilerOptions": {
     "target": "ES2022", "module": "NodeNext", "moduleResolution": "NodeNext",
     "strict": true, "esModuleInterop": true, "skipLibCheck": true,
-    "outDir": "dist", "types": ["node"], "rootDir": "src"
+    "outDir": "dist", "types": ["node"], "rootDir": "src",
+    "rewriteRelativeImportExtensions": true
   },
   "include": ["src"]
 }

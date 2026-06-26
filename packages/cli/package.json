@@ -8,5 +8,6 @@
     "build": "tsc -p tsconfig.json",
     "test": "node --import tsx --test 'test/**/*.test.ts'"
   },
+  "engines": { "node": ">=22" },
   "devDependencies": { "@types/node": "^25.9.3", "tsx": "^4.22.4", "typescript": "^5.9.3" }
 }

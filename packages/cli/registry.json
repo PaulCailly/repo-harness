@@ -93,6 +93,7 @@
     "release-notes": {
       "description": "AI release notes on tag",
       "dependsOn": ["_lib"],
+      "secrets": ["OPENROUTER_API_KEY"],
       "files": [
         { "src": "release-notes/release-notes.ts", "dest": "{sentinel}/src/release-notes.ts", "type": "managed" }
       ],
