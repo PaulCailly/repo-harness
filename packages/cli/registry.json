@@ -1,1 +1,19 @@
-{ "version": "0.0.0", "items": {} }
+{
+  "version": "0.1.0",
+  "items": {
+    "_lib": { "description": "shared sentinel lib", "files": [] },
+    "quality": {
+      "description": "Code-health gate + sticky Code Quality PR report",
+      "dependsOn": ["_lib"],
+      "files": [
+        { "src": "quality/index.mjs",   "dest": "{scripts}/health/index.mjs",   "type": "managed" },
+        { "src": "quality/analyze.mjs",  "dest": "{scripts}/health/analyze.mjs",  "type": "managed" },
+        { "src": "quality/config.mjs",   "dest": "{scripts}/health/config.mjs",   "type": "owned" },
+        { "src": "quality/quality-report.ts", "dest": "{sentinel}/src/quality-report.ts", "type": "managed" }
+      ],
+      "workflows": [
+        { "src": "quality/quality-gate.yml", "dest": ".github/workflows/quality-gate.yml", "type": "managed", "mode": "gate" }
+      ]
+    }
+  }
+}

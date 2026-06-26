@@ -1,0 +1,30 @@
+# registry/quality/quality-gate.yml
+# Code-health gate — deterministic, dependency-free. Scores src/ and posts a
+# sticky "Code Quality" PR comment. Informational by default (never blocks);
+# set features.quality.mode = "block" in repo-harness.json to fail on regressions.
+name: Quality gate
+on:
+  pull_request:
+permissions:
+  contents: read
+  pull-requests: write
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Code-health metrics
+        run: node scripts/health/index.mjs src --json .health/health.json | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Install report deps
+        working-directory: .github/sentinel
+        run: npm ci --no-audit --no-fund
+      - name: Code quality report
+        working-directory: .github/sentinel
+        run: npm run quality-report
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HEALTH_REPORT_DIR: ${{ github.workspace }}/.health
+          COVERAGE_SUMMARY: ${{ github.workspace }}/coverage/coverage-summary.json
