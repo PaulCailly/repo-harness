@@ -1,0 +1,13 @@
+{
+  "version": "9.9.9",
+  "items": {
+    "demo": {
+      "description": "demo gate",
+      "files": [
+        { "src": "demo/engine.mjs", "dest": "{scripts}/demo/engine.mjs", "type": "managed" },
+        { "src": "demo/policy.mjs", "dest": "{scripts}/demo/policy.mjs", "type": "owned" }
+      ]
+    },
+    "needsdemo": { "description": "depends on demo", "dependsOn": ["demo"], "files": [] }
+  }
+}
