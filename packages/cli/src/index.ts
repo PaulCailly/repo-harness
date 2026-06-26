@@ -31,6 +31,8 @@ export async function run(argv: string[]): Promise<number> {
       return (await import("./commands/init.js")).default(rest);
     case "add":
       return (await import("./commands/add.js")).default(rest);
+    case "update":
+      return (await import("./commands/update.js")).default(rest);
     default:
       console.log(USAGE);
       return 0;
