@@ -29,6 +29,8 @@ export async function run(argv: string[]): Promise<number> {
   switch (cmd) {
     case "init":
       return (await import("./commands/init.js")).default(rest);
+    case "add":
+      return (await import("./commands/add.js")).default(rest);
     default:
       console.log(USAGE);
       return 0;
