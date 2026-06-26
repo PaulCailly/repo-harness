@@ -1,0 +1,12 @@
+{
+  "name": "repo-harness",
+  "version": "0.0.0",
+  "type": "module",
+  "bin": { "repo-harness": "dist/index.js" },
+  "files": ["dist", "registry", "registry.json"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "node --import tsx --test 'test/**/*.test.ts'"
+  },
+  "devDependencies": { "@types/node": "^25.9.3", "tsx": "^4.22.4", "typescript": "^5.9.3" }
+}
