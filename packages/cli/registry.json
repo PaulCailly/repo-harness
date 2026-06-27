@@ -1,5 +1,5 @@
 {
-  "version": "0.3.0",
+  "version": "0.4.0",
   "items": {
     "_lib": {
       "description": "shared sentinel lib",
@@ -81,13 +81,25 @@
     "qa": {
       "description": "/qa exploratory computer-use QA (divide-and-conquer, Gemini-driven)",
       "dependsOn": ["_lib"],
-      "secrets": ["GEMINI_API_KEY", "OPENROUTER_API_KEY", "BLOB_READ_WRITE_TOKEN", "BLOB_STORE_ID"],
+      "secrets": [
+        "GEMINI_API_KEY",
+        "OPENROUTER_API_KEY",
+        "BLOB_READ_WRITE_TOKEN",
+        "BLOB_STORE_ID",
+        "QA_LOGIN_EMAIL",
+        "QA_LOGIN_PASSWORD",
+        "QA_PIN"
+      ],
       "files": [
         { "src": "qa/qa.ts",                              "dest": "{sentinel}/src/qa.ts",                        "type": "managed" },
         { "src": "qa/scripts/gen-qa-map.ts",              "dest": "{sentinel}/scripts/gen-qa-map.ts",            "type": "managed" },
+        { "src": "qa/scripts/gen-bible.ts",               "dest": "{sentinel}/scripts/gen-bible.ts",             "type": "managed" },
         { "src": "_lib/src/lib/qa-map.ts",                "dest": "{sentinel}/src/lib/qa-map.ts",                "type": "managed" },
         { "src": "_lib/src/lib/qa-shard.ts",              "dest": "{sentinel}/src/lib/qa-shard.ts",              "type": "managed" },
-        { "src": "_lib/src/lib/qa-map.generated.json",    "dest": "{sentinel}/src/lib/qa-map.generated.json",    "type": "owned" },
+        { "src": "_lib/src/lib/route-extract.ts",         "dest": "{sentinel}/src/lib/route-extract.ts",         "type": "managed" },
+        { "src": "_lib/src/lib/bible-gen.ts",             "dest": "{sentinel}/src/lib/bible-gen.ts",             "type": "managed" },
+        { "src": "qa/qa-map.overlay.ts",                  "dest": "{sentinel}/src/lib/qa-map.overlay.ts",        "type": "owned" },
+        { "src": "qa/qa-map.generated.json",              "dest": "{sentinel}/src/lib/qa-map.generated.json",    "type": "owned" },
         { "src": "qa/QA-MEMORY.md",                       "dest": "{sentinel}/QA-MEMORY.md",                     "type": "owned" }
       ],
       "workflows": [
