@@ -116,6 +116,8 @@ async function main(): Promise<void> {
         { role: "system", content: p.system },
         { role: "user",   content: p.user },
       ],
+      // Note: not all OpenRouter models honor json_object response_format (some 400
+      // or return plain prose). parseOverlay's code-fence stripping is the fallback.
       response_format: { type: "json_object" },
     });
     const text = response.choices[0]?.message?.content;
