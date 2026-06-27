@@ -24,6 +24,8 @@ npx gatekit update
 - **Quality gate** — cyclomatic complexity, LOC, nesting, params, duplication; sticky PR report
 - **Compliance gate** — un-allowlisted egress, server secrets in client, hardcoded credentials, telemetry seam; `/compliance` LLM audit
 - **PR bots** — `/review`, `/debate`, `/qa` (with persistent QA memory), `release-notes`
+- **QA bible + `/qa all`** — portable bible: Opus-generated owned overlay on top of auto-extracted routes; `/qa all` fans out one focused agent per domain (divide-and-conquer); managed engine, owned bible
+- **`/review` "Ways to fix this"** — every finding surfaces 3 schema-forced, genuinely-distinct fix approaches (title · description · snippet · copy-as-prompt)
 - **Managed / owned split** — engine code is updatable; your policy (`config.mjs`, `controls.mjs`) is yours forever
 - **`report` / `block` modes** — annotate-only by default; opt into blocking per gate
 
@@ -38,4 +40,4 @@ npx gatekit update
 
 Full docs: https://paulcailly.github.io/gatekit/
 
-> gatekit dogfoods its own quality gate — the code health badge above is gatekit measuring itself.
+> gatekit dogfoods its own gates — the code health badge above is gatekit measuring itself, and gatekit reviews its own PRs with its own `/review` bot (it caught real bugs).

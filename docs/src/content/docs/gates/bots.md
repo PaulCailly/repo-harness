@@ -29,6 +29,19 @@ OPENROUTER_API_KEY
 npx gatekit add review
 ```
 
+### Ways to fix this
+
+Every `/review` finding includes a **"Ways to fix this"** block with three genuinely-distinct fix approaches:
+
+| Field | Description |
+|-------|-------------|
+| **Title** | Short name for the strategy (e.g. "Extract helper", "Inline guard", "Redesign interface") |
+| **Description** | One-sentence rationale — why this approach fits and what trade-off it carries |
+| **Snippet** | Concrete code change illustrating the approach |
+| **Copy-as-prompt** | Collapsible block containing a ready-to-paste Claude Code prompt that implements the fix |
+
+The three approaches are **schema-forced**: the LLM receives a strict JSON schema and must return exactly three entries. The review prompt explicitly asks for strategies that differ in kind — not minor variations — so you get at least one conservative fix, one moderate refactor, and one more structural alternative to compare before acting.
+
 ---
 
 ## `/debate`
