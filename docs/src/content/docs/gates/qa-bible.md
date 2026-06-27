@@ -124,7 +124,7 @@ OPENROUTER_API_KEY=sk-or-… npm run qa:gen-bible
 Sends your route list and `gatekit.json` config to **Opus** (via OpenRouter) which reasons about the app's structure and drafts a populated `qa-map.overlay.ts`: real domain groupings, realistic preconditions, and a curated out-of-scope list.
 
 - If no overlay exists yet, the file is written directly.
-- If an overlay already exists, the draft is written as `qa-map.overlay.ts.draft` so you can diff and cherry-pick.
+- If an overlay already exists, the draft is written as `qa-map.overlay.draft.ts` so you can diff and cherry-pick.
 - The file is validated and route-checked before write — gatekit will never write a broken bible.
 
 ### Step 3 — refine
