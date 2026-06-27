@@ -29,6 +29,7 @@ export default async function add(args: string[]): Promise<number> {
     const item = reg.items[name];
     for (const spec of [...item.files, ...(item.workflows ?? [])]) {
       const r = applyFile({ root, cwd, spec, paths: manifest.paths, version: reg.version, manifest });
+      // "adopted" = pre-existing file is byte-identical to upstream; now tracked as managed
       console.log(`  ${r.action.padEnd(14)} ${r.dest}`);
     }
     for (const s of item.secrets ?? []) secrets.add(s);

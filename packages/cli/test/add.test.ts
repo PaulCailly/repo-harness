@@ -52,3 +52,34 @@ test("applyFile does not clobber an untracked pre-existing managed file", async 
   // Must NOT be recorded in manifest
   assert.equal(manifest.installed["scripts/demo/engine.mjs"], undefined);
 });
+
+test("applyFile adopts an untracked managed file whose content is byte-identical to upstream", async () => {
+  const { readFileSync } = await import("node:fs");
+  const cwd = await mkdtemp(join(tmpdir(), "rh-"));
+  await mkdir(join(cwd, "scripts/demo"), { recursive: true });
+  // Pre-create dest with EXACT upstream content
+  const upstreamContent = readFileSync(
+    join(ROOT, "registry/demo/engine.mjs"),
+    "utf8"
+  );
+  await writeFile(join(cwd, "scripts/demo/engine.mjs"), upstreamContent);
+  const reg = loadRegistry(ROOT);
+  const manifest: any = { installed: {} }; // not tracked — simulates reconcile scenario
+  const spec = reg.items.demo.files[0]; // managed engine.mjs
+  const r = applyFile({ root: ROOT, cwd, spec, paths: PATHS, version: "9.9.9", manifest });
+  // Must return adopted
+  assert.equal(r.action, "adopted");
+  // No side-car created
+  assert.ok(!existsSync(join(cwd, "scripts/demo/engine.mjs.harness-new")), "no .harness-new should be created");
+  // Original file untouched
+  assert.equal(await readFile(join(cwd, "scripts/demo/engine.mjs"), "utf8"), upstreamContent);
+  // Must be recorded in manifest as managed with correct sha
+  const entry = manifest.installed["scripts/demo/engine.mjs"];
+  assert.ok(entry, "manifest entry must exist after adopt");
+  assert.equal(entry.type, "managed");
+  assert.equal(entry.version, "9.9.9");
+  // sha must match the file content
+  const { createHash } = await import("node:crypto");
+  const expectedSha = createHash("sha256").update(upstreamContent).digest("hex");
+  assert.equal(entry.sha, expectedSha);
+});
