@@ -6,8 +6,9 @@
   "files": ["dist", "registry", "registry.json"],
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "node --import tsx --test 'test/**/*.test.ts'"
+    "test": "node --import tsx --test 'test/**/*.test.ts'",
+    "coverage": "c8 --reporter=text --reporter=json-summary --src src node --import tsx --test 'test/**/*.test.ts'"
   },
   "engines": { "node": ">=22" },
-  "devDependencies": { "@types/node": "^25.9.3", "tsx": "^4.22.4", "typescript": "^5.9.3" }
+  "devDependencies": { "@types/node": "^25.9.3", "c8": "^10.1.3", "tsx": "^4.22.4", "typescript": "^5.9.3" }
 }

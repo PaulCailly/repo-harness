@@ -6,6 +6,8 @@ on:
 jobs:
   cli:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     defaults:
       run:
         working-directory: packages/cli
@@ -22,3 +24,37 @@ jobs:
       # informational — the health engine always exits 0.
       - name: Self-check (code-health on our own source)
         run: node registry/quality/index.mjs src --json .health/health.json | tee -a "$GITHUB_STEP_SUMMARY"
+
+      # Badge refresh — only on push to main (skipped for PRs)
+      - name: Generate coverage data
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: npm run coverage
+
+      - name: Refresh badges
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          # Parse coverage line %
+          COV_PCT=$(node -e "
+            const s = JSON.parse(require('fs').readFileSync('coverage/coverage-summary.json','utf8'));
+            console.log(Math.round(s.total.lines.pct) + '%');
+          ")
+          # Parse health score
+          HEALTH_SCORE=$(node -e "
+            const h = JSON.parse(require('fs').readFileSync('.health/health.json','utf8'));
+            console.log(h.score + '/100');
+          ")
+          # Regenerate SVGs
+          node scripts/make-badge.mjs coverage "$COV_PCT" ../../.github/badges/coverage.svg
+          node scripts/make-badge.mjs "code health" "$HEALTH_SCORE" ../../.github/badges/quality.svg
+
+      - name: Commit refreshed badges
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        working-directory: ${{ github.workspace }}
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git diff --quiet .github/badges/ || (
+            git add .github/badges/coverage.svg .github/badges/quality.svg &&
+            git commit -m "chore: refresh badges [skip ci]" &&
+            git push
+          )

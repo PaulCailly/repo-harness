@@ -4,4 +4,5 @@ dist/
 .superpowers/
 scratch/
 .health/
+coverage/
 docs/package-lock.json
