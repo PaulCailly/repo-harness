@@ -15,11 +15,11 @@ function safeFence(lang: string, content: string): [open: string, close: string]
 }
 
 /**
- * Heuristic: does the snippet look like TSX/JSX?
- * Checks for an opening angle-bracket tag (`<Letter`) or an arrow (`=>`).
+ * Heuristic: does the snippet look like JSX?
+ * Checks for an opening angle-bracket tag (`<Letter`).
  */
 function looksLikeTsx(snippet: string): boolean {
-  return /<[A-Za-z]/.test(snippet) || /=>/.test(snippet);
+  return /<[A-Za-z]/.test(snippet);
 }
 
 /**

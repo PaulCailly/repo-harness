@@ -62,6 +62,7 @@ const REVIEW_SCHEMA = {
             maxItems: 3,
             items: {
               type: "object",
+              additionalProperties: false,
               properties: {
                 title: { type: "string" },
                 description: { type: "string" },
