@@ -29,6 +29,16 @@ test("next-app: page.tsx dirs → routes", () => {
   assert.deepEqual(r.routes.map((x) => x.path).sort(), ["/", "/blog/:slug"]);
 });
 
+test("next-app: route groups are stripped from URL", () => {
+  const d = tmp();
+  mkdirSync(join(d, "app/(marketing)/blog"), { recursive: true });
+  mkdirSync(join(d, "app/(shop)"), { recursive: true });
+  writeFileSync(join(d, "app/(marketing)/blog/page.tsx"), "x");
+  writeFileSync(join(d, "app/(shop)/page.tsx"), "x");
+  const r = extractRoutes(d, { routing: "next-app", appDir: "app" });
+  assert.deepEqual(r.routes.map((x) => x.path).sort(), ["/", "/blog"]);
+});
+
 test("glob: matched files → routes via strip rule", () => {
   const d = tmp();
   mkdirSync(join(d, "src/screens"), { recursive: true });

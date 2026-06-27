@@ -51,7 +51,7 @@ function walkFiles(dir: string, rel = ""): string[] {
   return out;
 }
 
-/** [param] → :param; also handles (group) segments used in Next app dir. */
+/** [param] → :param. Does NOT handle (group) route-group segments — those are filtered out upstream before this is called. */
 function dynamicToColon(seg: string): string {
   return seg.replace(/\[([^\]]+)\]/g, ":$1");
 }
@@ -115,8 +115,9 @@ function extractNextApp(rootDir: string, cfg: QaConfig): GeneratedRoute[] {
     if (!dirPart) {
       routePath = "/";
     } else {
-      const segs = dirPart.split("/").map(dynamicToColon);
-      routePath = "/" + segs.join("/");
+      // Strip Next.js route groups (e.g. "(marketing)") — layout-only, never in the URL.
+      const segs = dirPart.split("/").filter(s => !/^\(.*\)$/.test(s)).map(dynamicToColon);
+      routePath = segs.length === 0 ? "/" : "/" + segs.join("/");
     }
     const { section, module } = sectionAndModule(routePath, cfg.modulePrefix);
     seen.set(routePath, { path: routePath, section, module });

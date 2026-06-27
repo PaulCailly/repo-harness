@@ -14,7 +14,20 @@ import path from "node:path";
 import { extractRoutes, type QaConfig } from "../src/lib/route-extract.js";
 
 const SENTINEL_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const REPO_ROOT = path.resolve(SENTINEL_DIR, "../../../..");
+
+/** Walk up from startDir to the nearest directory containing gatekit.json; fall back to process.cwd(). */
+function findRepoRoot(startDir: string): string {
+  let dir = startDir;
+  while (true) {
+    if (existsSync(path.join(dir, "gatekit.json"))) return dir;
+    const parent = path.dirname(dir);
+    if (parent === dir) break; // reached filesystem root
+    dir = parent;
+  }
+  return process.cwd();
+}
+
+const REPO_ROOT = findRepoRoot(path.dirname(fileURLToPath(import.meta.url)));
 export const PAGES_DIR = path.resolve(SENTINEL_DIR, "../../src/pages");
 const LOCALES_DIR = path.resolve(SENTINEL_DIR, "../../public/locales");
 const OUT = path.resolve(SENTINEL_DIR, "src/lib/qa-map.generated.json");
@@ -41,7 +54,12 @@ function loadGatekitQaConfig(): QaConfig | null {
   try {
     const raw = JSON.parse(readFileSync(gkPath, "utf8")) as Record<string, unknown>;
     if (!raw.qa || typeof raw.qa !== "object") return null;
-    return raw.qa as QaConfig;
+    const qa = raw.qa as Record<string, unknown>;
+    if (typeof qa.routing !== "string") {
+      console.log("[gatekit] qa.routing missing or not a string — using next-pages fallback");
+      return null;
+    }
+    return qa as unknown as QaConfig;
   } catch {
     return null;
   }
