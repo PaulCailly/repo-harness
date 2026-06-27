@@ -17,6 +17,6 @@ test("list returns 0 and runs against a manifest", async () => {
     features: { demo: { enabled: true, mode: "report" } }, installed: {},
   });
   const prev = process.cwd(); process.chdir(cwd);
-  try { process.env.REPO_HARNESS_ROOT = ROOT; assert.equal(await list([]), 0); }
-  finally { process.chdir(prev); delete process.env.REPO_HARNESS_ROOT; }
+  try { process.env.GATEKIT_ROOT = ROOT; assert.equal(await list([]), 0); }
+  finally { process.chdir(prev); delete process.env.GATEKIT_ROOT; }
 });

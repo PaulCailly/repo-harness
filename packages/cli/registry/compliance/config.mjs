@@ -1,8 +1,8 @@
 /**
- * OWNED FILE — repo-harness scaffolds this once; edit freely. Fill in your
+ * OWNED FILE — gatekit scaffolds this once; edit freely. Fill in your
  * real egress allowlist, server scope, secrets, and analytics seam. The engine
- * (analyze.mjs / index.mjs) is managed by repo-harness and updated via
- * `npx repo-harness update` — do NOT edit those files here.
+ * (analyze.mjs / index.mjs) is managed by gatekit and updated via
+ * `npx gatekit update` — do NOT edit those files here.
  *
  * Privacy-compliance analyzer configuration — the machine-readable privacy
  * policy for this repository. Every threshold, allowlist, and penalty lives

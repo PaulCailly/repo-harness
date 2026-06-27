@@ -32,7 +32,7 @@ export function classify(root: string, cwd: string, manifest: Manifest, reg: Reg
 export default async function update(_args: string[]): Promise<number> {
   const cwd = process.cwd();
   const manifest = readManifest(cwd);
-  if (!manifest) { console.error("No repo-harness.json — run `repo-harness init` first."); return 1; }
+  if (!manifest) { console.error("No gatekit.json — run `gatekit init` first."); return 1; }
   const root = registryRoot();
   const reg = loadRegistry(root);
   let conflicts = 0;

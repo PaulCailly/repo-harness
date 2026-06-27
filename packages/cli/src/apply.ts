@@ -23,7 +23,7 @@ export function applyFile(opts: {
     existsSync(abs) &&
     !manifest.installed[rel]
   ) {
-    // Dest exists but was NOT installed by repo-harness.
+    // Dest exists but was NOT installed by gatekit.
     // If the on-disk content is byte-identical to upstream, adopt it (track as managed).
     // Otherwise write upstream to a side-car so the consumer can diff manually.
     const onDisk = readFileSync(abs, "utf8");

@@ -1,9 +1,9 @@
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 
-const USAGE = `repo-harness <command>
+const USAGE = `gatekit <command>
 
-  init                 create repo-harness.json
+  init                 create gatekit.json
   add <feature...>     vendor a gate into this repo
   update [feature...]  update managed engine files
   diff [feature...]    show what update would change

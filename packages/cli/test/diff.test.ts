@@ -21,7 +21,7 @@ test("diff returns 2 when an engine update is available", async () => {
   });
   const prev = process.cwd(); process.chdir(cwd);
   try {
-    process.env.REPO_HARNESS_ROOT = ROOT; // diff honors override for tests
+    process.env.GATEKIT_ROOT = ROOT; // diff honors override for tests
     assert.equal(await diff([]), 2);
-  } finally { process.chdir(prev); delete process.env.REPO_HARNESS_ROOT; }
+  } finally { process.chdir(prev); delete process.env.GATEKIT_ROOT; }
 });

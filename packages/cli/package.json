@@ -1,8 +1,8 @@
 {
-  "name": "repo-harness",
+  "name": "gatekit",
   "version": "0.0.0",
   "type": "module",
-  "bin": { "repo-harness": "dist/index.js" },
+  "bin": { "gatekit": "dist/index.js" },
   "files": ["dist", "registry", "registry.json"],
   "scripts": {
     "build": "tsc -p tsconfig.json",

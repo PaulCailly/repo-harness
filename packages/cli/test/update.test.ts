@@ -53,12 +53,12 @@ test("update skips orphaned files without crashing", async () => {
 
   // update default should not throw and should return 0, leaving the file untouched
   const prevCwd = process.cwd();
-  const prevRoot = process.env.REPO_HARNESS_ROOT;
+  const prevRoot = process.env.GATEKIT_ROOT;
   process.chdir(cwd);
-  process.env.REPO_HARNESS_ROOT = ROOT;
-  // Write a minimal repo-harness.json so readManifest succeeds
+  process.env.GATEKIT_ROOT = ROOT;
+  // Write a minimal gatekit.json so readManifest succeeds
   await writeFile(
-    join(cwd, "repo-harness.json"),
+    join(cwd, "gatekit.json"),
     JSON.stringify({ version: "0", paths: PATHS, installed: manifest.installed }),
   );
   let exitCode: number;
@@ -66,8 +66,8 @@ test("update skips orphaned files without crashing", async () => {
     exitCode = await update([]);
   } finally {
     process.chdir(prevCwd);
-    if (prevRoot === undefined) delete process.env.REPO_HARNESS_ROOT;
-    else process.env.REPO_HARNESS_ROOT = prevRoot;
+    if (prevRoot === undefined) delete process.env.GATEKIT_ROOT;
+    else process.env.GATEKIT_ROOT = prevRoot;
   }
   assert.equal(exitCode!, 0, "update should return 0 for orphaned file");
 

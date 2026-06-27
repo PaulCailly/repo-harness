@@ -6,7 +6,7 @@ import { loadRegistry, registryRoot } from "../registry.ts";
 export default async function remove(args: string[]): Promise<number> {
   const cwd = process.cwd();
   const manifest = readManifest(cwd);
-  if (!manifest) { console.error("No repo-harness.json — run `repo-harness init` first."); return 1; }
+  if (!manifest) { console.error("No gatekit.json — run `gatekit init` first."); return 1; }
   const name = args[0];
   const reg = loadRegistry(registryRoot());
   const item = reg.items[name];

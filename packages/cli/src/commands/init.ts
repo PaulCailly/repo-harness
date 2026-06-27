@@ -3,12 +3,12 @@ import { detect } from "../detect.js";
 import { readManifest, writeManifest, type Manifest } from "../manifest.js";
 import { loadRegistry, registryRoot } from "../registry.js";
 
-const SCHEMA = "https://paulcailly.github.io/repo-harness/schema.json";
+const SCHEMA = "https://paulcailly.github.io/gatekit/schema.json";
 
 export default async function init(_args: string[]): Promise<number> {
   const cwd = process.cwd();
   if (readManifest(cwd)) {
-    console.log("repo-harness.json already exists — leaving it untouched.");
+    console.log("gatekit.json already exists — leaving it untouched.");
     return 0;
   }
   const { packageManager, paths } = detect(cwd);
@@ -26,7 +26,7 @@ export default async function init(_args: string[]): Promise<number> {
     features,
     installed: {},
   });
-  console.log(`Wrote repo-harness.json (registry ${reg.version}, ${packageManager}).`);
-  console.log("Next: npx repo-harness add <feature>");
+  console.log(`Wrote gatekit.json (registry ${reg.version}, ${packageManager}).`);
+  console.log("Next: npx gatekit add <feature>");
   return 0;
 }

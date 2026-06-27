@@ -16,7 +16,7 @@
 # Violations are scored and surfaced in the step summary but the check never
 # fails.  To make violations block the PR, set:
 #   features.compliance.mode = "block"
-# in repo-harness.json.  In block mode the analyzer exits non-zero on a
+# in gatekit.json.  In block mode the analyzer exits non-zero on a
 # violation, and bash pipefail propagates that exit through the tee pipe.
 
 name: Compliance gate
@@ -40,7 +40,7 @@ jobs:
       - name: Resolve enforcement mode
         id: rh
         run: |
-          MODE=$(node -e "try{const m=JSON.parse(require('fs').readFileSync('repo-harness.json','utf8'));process.stdout.write((m.features&&m.features.compliance&&m.features.compliance.mode)||'report')}catch(e){process.stdout.write('report')}")
+          MODE=$(node -e "try{const m=JSON.parse(require('fs').readFileSync('gatekit.json','utf8'));process.stdout.write((m.features&&m.features.compliance&&m.features.compliance.mode)||'report')}catch(e){process.stdout.write('report')}")
           echo "Compliance gate enforcement mode: $MODE"
           if [ "$MODE" = "block" ]; then echo "nofail=" >> "$GITHUB_OUTPUT"; else echo "nofail=--no-fail" >> "$GITHUB_OUTPUT"; fi
 

@@ -26,10 +26,10 @@ test("remove deletes managed but keeps owned", async () => {
   });
   const prev = process.cwd(); process.chdir(cwd);
   try {
-    process.env.REPO_HARNESS_ROOT = ROOT;
+    process.env.GATEKIT_ROOT = ROOT;
     assert.equal(await remove(["demo"]), 0);
     assert.equal(existsSync(join(cwd, "scripts/demo/engine.mjs")), false);
     assert.equal(existsSync(join(cwd, "scripts/demo/policy.mjs")), true);
     assert.equal(readManifest(cwd)!.features.demo.enabled, false);
-  } finally { process.chdir(prev); delete process.env.REPO_HARNESS_ROOT; }
+  } finally { process.chdir(prev); delete process.env.GATEKIT_ROOT; }
 });

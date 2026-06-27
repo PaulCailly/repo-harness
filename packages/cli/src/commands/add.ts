@@ -6,11 +6,11 @@ export default async function add(args: string[]): Promise<number> {
   const cwd = process.cwd();
   const manifest = readManifest(cwd);
   if (!manifest) {
-    console.error("No repo-harness.json — run `repo-harness init` first.");
+    console.error("No gatekit.json — run `gatekit init` first.");
     return 1;
   }
   if (args.length === 0) {
-    console.error("Usage: repo-harness add <feature...>");
+    console.error("Usage: gatekit add <feature...>");
     return 1;
   }
 

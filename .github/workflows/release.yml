@@ -3,10 +3,10 @@ on:
   push:
     tags: ['v*']
 # NOTE: Before the first publish:
-#   (a) The name "repo-harness" is taken on npmjs.com — set a scoped name like
-#       "@<your-npm-username>/repo-harness" in packages/cli/package.json first.
+#   (a) The unscoped name "gatekit" is taken on npmjs.com — publish under a scope like
+#       "@<your-npm-username>/gatekit" in packages/cli/package.json first.
 #   (b) Configure a Trusted Publisher once on npmjs.com:
-#       Package Settings → Trusted Publisher → GitHub → repo PaulCailly/repo-harness,
+#       Package Settings → Trusted Publisher → GitHub → repo PaulCailly/gatekit,
 #       workflow "release.yml". No NPM_TOKEN secret needed after that.
 permissions:
   contents: write

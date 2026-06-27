@@ -5,7 +5,7 @@ import { classify } from "./update.ts";
 export default async function list(_args: string[]): Promise<number> {
   const cwd = process.cwd();
   const manifest = readManifest(cwd);
-  if (!manifest) { console.error("No repo-harness.json — run `repo-harness init` first."); return 1; }
+  if (!manifest) { console.error("No gatekit.json — run `gatekit init` first."); return 1; }
   const root = registryRoot();
   const rows = classify(root, cwd, manifest, loadRegistry(root));
   const drift = rows.filter((r) => r.state === "update-available" || r.state === "locally-modified").length;

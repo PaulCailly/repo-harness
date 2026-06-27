@@ -1,7 +1,7 @@
 /**
- * OWNED FILE — repo-harness scaffolds this once; edit freely. Tune the thresholds
+ * OWNED FILE — gatekit scaffolds this once; edit freely. Tune the thresholds
  * to your repo. The analyzer engine (index.mjs/analyze.mjs) is managed by
- * repo-harness and updated via `npx repo-harness update`.
+ * gatekit and updated via `npx gatekit update`.
  */
 
 /**

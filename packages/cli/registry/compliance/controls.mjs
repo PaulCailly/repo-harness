@@ -1,5 +1,5 @@
 /**
- * OWNED FILE — repo-harness scaffolds this once; edit freely. This is the
+ * OWNED FILE — gatekit scaffolds this once; edit freely. This is the
  * compliance control register: the bridge between the deterministic checks
  * (analyze.mjs / config.mjs) and the privacy frameworks your project is held
  * to. Fill in real controls for your project; delete the placeholder below.

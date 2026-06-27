@@ -11,7 +11,7 @@ export interface Manifest {
   installed: Record<string, { sha: string; type: "managed" | "owned"; version: string }>;
 }
 
-const FILE = "repo-harness.json";
+const FILE = "gatekit.json";
 
 export function readManifest(cwd: string): Manifest | null {
   const p = join(cwd, FILE);
