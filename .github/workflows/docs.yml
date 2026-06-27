@@ -21,7 +21,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm install
+      # npm optional-deps bug (#4828): a package-lock from another platform omits
+      # the correct native rolldown/rollup binding (e.g. linux-x64-gnu), breaking
+      # the Astro build on the runner. Resolve optional deps fresh per-platform.
+      - run: rm -f package-lock.json && npm install --no-audit --no-fund
       - run: npm run build
       - uses: actions/upload-pages-artifact@v3
         with:
