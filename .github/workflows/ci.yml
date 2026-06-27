@@ -17,3 +17,8 @@ jobs:
       - run: npm install
       - run: npm run build
       - run: npm test
+      # Dogfood: run our own code-health engine on our own CLI source.
+      # typescript resolves from packages/cli/node_modules (installed above);
+      # informational — the health engine always exits 0.
+      - name: Self-check (code-health on our own source)
+        run: node registry/quality/index.mjs src --json .health/health.json | tee -a "$GITHUB_STEP_SUMMARY"
