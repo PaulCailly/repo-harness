@@ -1,15 +1,15 @@
 ---
-title: repo-harness
+title: gatekit
 description: Ship quality and compliance gates into any repo without copy-paste drift.
 template: splash
 hero:
   tagline: Vendor compliance and quality gates like shadcn/ui — managed engines, owned policies, zero copy-paste drift.
   actions:
     - text: Get Started
-      link: /repo-harness/cli/
+      link: /gatekit/cli/
       icon: right-arrow
     - text: GitHub
-      link: https://github.com/PaulCailly/repo-harness
+      link: https://github.com/PaulCailly/gatekit
       icon: external
       variant: minimal
 ---
@@ -22,13 +22,13 @@ Most teams share CI quality and compliance checks by forking or copying YAML/scr
 
 ## The shadcn model
 
-repo-harness borrows the pattern that [shadcn/ui](https://ui.shadcn.com) uses for UI components: **vendor the code into your repo** rather than hiding it behind a package boundary.
+gatekit borrows the pattern that [shadcn/ui](https://ui.shadcn.com) uses for UI components: **vendor the code into your repo** rather than hiding it behind a package boundary.
 
 Every gate is split into two layers:
 
 | Layer | Owner | Update behaviour |
 |-------|-------|------------------|
-| **Managed engine** (workflows, bot scripts) | repo-harness | Overwritten on `update` if file is unedited; otherwise placed as `.harness-new` for manual merge |
+| **Managed engine** (workflows, bot scripts) | gatekit | Overwritten on `update` if file is unedited; otherwise placed as `.harness-new` for manual merge |
 | **Owned policy** (`config.mjs`, `controls.mjs`, `QA-MEMORY.md`) | Your team | Scaffolded once, **never overwritten** — your policy lives in your repo |
 
 This means you get upstream engine improvements with a single command while keeping full control over your thresholds, allowlists, and compliance controls.
@@ -37,29 +37,28 @@ This means you get upstream engine improvements with a single command while keep
 
 ```bash
 # 1. Initialise the manifest in your repo
-npx repo-harness init
+npx gatekit init
 
 # 2. Add the gates you want
-npx repo-harness add quality compliance
+npx gatekit add quality compliance
 
 # 3. Check what's installed
-npx repo-harness list
+npx gatekit list
 ```
 
-After `init`, a `repo-harness.json` manifest is created at your repo root. After `add`, the managed engine files are vendored into `.github/` and `scripts/`, and the owned policy stubs are scaffolded — ready for you to fill in.
+After `init`, a `gatekit.json` manifest is created at your repo root. After `add`, the managed engine files are vendored into `.github/` and `scripts/`, and the owned policy stubs are scaffolded — ready for you to fill in.
 
 <CardGrid stagger>
   <Card title="CLI Reference" icon="open-book">
-    All commands, flags, and the `repo-harness.json` schema — [cli](/repo-harness/cli/)
+    All commands, flags, and the `gatekit.json` schema — [cli](/gatekit/cli/)
   </Card>
   <Card title="Quality Gate" icon="approve-check-circle">
-    Cyclomatic complexity, LOC, nesting, params, duplication — [gates/quality](/repo-harness/gates/quality/)
+    Cyclomatic complexity, LOC, nesting, params, duplication — [gates/quality](/gatekit/gates/quality/)
   </Card>
   <Card title="Compliance Gate" icon="shield">
-    Egress allowlist, secret detection, telemetry seam audit — [gates/compliance](/repo-harness/gates/compliance/)
+    Egress allowlist, secret detection, telemetry seam audit — [gates/compliance](/gatekit/gates/compliance/)
   </Card>
   <Card title="Bots" icon="comment">
-    `/review`, `/debate`, `/qa`, `release-notes` — [gates/bots](/repo-harness/gates/bots/)
+    `/review`, `/debate`, `/qa`, `release-notes` — [gates/bots](/gatekit/gates/bots/)
   </Card>
 </CardGrid>
-

@@ -5,11 +5,11 @@ import starlight from '@astrojs/starlight';
 // https://astro.build/config
 export default defineConfig({
 	site: 'https://paulcailly.github.io',
-	base: '/repo-harness',
+	base: '/gatekit',
 	integrations: [
 		starlight({
-			title: 'repo-harness',
-			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/PaulCailly/repo-harness' }],
+			title: 'gatekit',
+			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/PaulCailly/gatekit' }],
 			sidebar: [
 				{ label: 'Getting Started', slug: 'index' },
 				{ label: 'CLI Reference', slug: 'cli' },

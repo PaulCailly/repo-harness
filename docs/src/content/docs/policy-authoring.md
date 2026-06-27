@@ -5,12 +5,12 @@ description: How to fill in compliance/config.mjs and controls.mjs — egress al
 
 ## Overview
 
-When you run `npx repo-harness add compliance`, two **owned** files are scaffolded into your repo:
+When you run `npx gatekit add compliance`, two **owned** files are scaffolded into your repo:
 
 - `compliance/config.mjs` — runtime policy: what egress is allowed, which env vars are server-only, what counts as a secret, where analytics may live
 - `compliance/controls.mjs` — documentation: your privacy controls, standards covered, and sub-processors
 
-Because these files are **owned**, `npx repo-harness update` will never touch them. Your policy stays in version control alongside your code, under your team's ownership.
+Because these files are **owned**, `npx gatekit update` will never touch them. Your policy stays in version control alongside your code, under your team's ownership.
 
 ---
 
@@ -186,7 +186,7 @@ export const subProcessors = [
 
 ## Worked examples (conceptual)
 
-Two real-world repo-harness adopters illustrate how policy is shaped by the app:
+Two real-world gatekit adopters illustrate how policy is shaped by the app:
 
 **Event platform (Next.js + Prisma + Neon):** Egress allowlist covers Stripe (payments), Resend (transactional email), and PostHog (analytics). `analytics.seamDir` points to `src/analytics/`. `serverOnlySecrets` includes `DATABASE_URL` and `STRIPE_SECRET_KEY`. Controls document GDPR Article 30 record of processing and right-to-erasure implementation via a user deletion endpoint.
 

@@ -26,7 +26,7 @@ Analysis is performed by the `scripts/health/` engine (a Node.js script vendored
 | `report` | Gate always passes; violations appear as a PR comment annotation only |
 | `block` | Gate fails the CI check if any threshold is exceeded; PR cannot be merged until violations are fixed or thresholds adjusted |
 
-Change the mode in `repo-harness.json`:
+Change the mode in `gatekit.json`:
 
 ```json
 {
@@ -80,7 +80,7 @@ Example report structure:
 ## Install
 
 ```bash
-npx repo-harness add quality
+npx gatekit add quality
 ```
 
 No secrets required — the gate uses only the `GITHUB_TOKEN` automatically provided by GitHub Actions.

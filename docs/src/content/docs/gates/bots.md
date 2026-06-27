@@ -5,7 +5,7 @@ description: PR bots — /review, /debate, /qa, and release-notes.
 
 ## Overview
 
-repo-harness ships four bot features that respond to slash commands posted as PR comments. Each bot is a GitHub Actions workflow triggered by `issue_comment` events.
+gatekit ships four bot features that respond to slash commands posted as PR comments. Each bot is a GitHub Actions workflow triggered by `issue_comment` events.
 
 ---
 
@@ -26,7 +26,7 @@ OPENROUTER_API_KEY
 **Install:**
 
 ```bash
-npx repo-harness add review
+npx gatekit add review
 ```
 
 ---
@@ -48,7 +48,7 @@ OPENROUTER_API_KEY
 **Install:**
 
 ```bash
-npx repo-harness add debate
+npx gatekit add debate
 ```
 
 ---
@@ -77,7 +77,7 @@ BLOB_STORE_ID
 **Install:**
 
 ```bash
-npx repo-harness add qa
+npx gatekit add qa
 ```
 
 ---
@@ -99,7 +99,7 @@ OPENROUTER_API_KEY
 **Install:**
 
 ```bash
-npx repo-harness add release-notes
+npx gatekit add release-notes
 ```
 
 ---

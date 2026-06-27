@@ -1,16 +1,16 @@
 ---
 title: CLI Reference
-description: repo-harness CLI commands, repo-harness.json schema, and managed/owned update semantics.
+description: gatekit CLI commands, gatekit.json schema, and managed/owned update semantics.
 ---
 
 ## Commands
 
 ### `init`
 
-Initialises repo-harness in the current directory. Creates a `repo-harness.json` manifest and detects your package manager.
+Initialises gatekit in the current directory. Creates a `gatekit.json` manifest and detects your package manager.
 
 ```bash
-npx repo-harness init
+npx gatekit init
 ```
 
 Prompts you to confirm the detected package manager (`npm`, `pnpm`, or `yarn`) and writes the initial manifest.
@@ -22,14 +22,14 @@ Prompts you to confirm the detected package manager (`npm`, `pnpm`, or `yarn`) a
 Vendors one or more features into the repo.
 
 ```bash
-npx repo-harness add quality
-npx repo-harness add quality compliance review
+npx gatekit add quality
+npx gatekit add quality compliance review
 ```
 
 For each feature:
 - Managed files (workflows, scripts, bot handlers) are copied into `.github/` and `scripts/`.
 - Owned files (`config.mjs`, `controls.mjs`, `QA-MEMORY.md`) are scaffolded once and never overwritten on subsequent runs.
-- `repo-harness.json` is updated with the feature entry and per-file SHA records.
+- `gatekit.json` is updated with the feature entry and per-file SHA records.
 
 ---
 
@@ -39,14 +39,14 @@ Pulls the latest managed files from the registry. Owned files are never touched.
 
 ```bash
 # Update all installed features
-npx repo-harness update
+npx gatekit update
 
 # Update a specific feature
-npx repo-harness update quality
+npx gatekit update quality
 ```
 
 For each managed file:
-- If the file on disk matches the SHA in `repo-harness.json` (unedited), the file is overwritten with the new version.
+- If the file on disk matches the SHA in `gatekit.json` (unedited), the file is overwritten with the new version.
 - If the file has been locally edited (SHA mismatch), the new version is placed alongside as `<filename>.harness-new`. You resolve the conflict manually, then remove the `.harness-new` file.
 
 ---
@@ -56,8 +56,8 @@ For each managed file:
 Shows a diff between the installed managed files and the current registry versions. Owned files are excluded.
 
 ```bash
-npx repo-harness diff
-npx repo-harness diff quality
+npx gatekit diff
+npx gatekit diff quality
 ```
 
 Prints a unified diff to stdout. Exit code 1 if any managed file is out of date (useful in CI).
@@ -69,7 +69,7 @@ Prints a unified diff to stdout. Exit code 1 if any managed file is out of date 
 Lists all installed features and their status.
 
 ```bash
-npx repo-harness list
+npx gatekit list
 ```
 
 Output includes: feature name, enabled/disabled status, mode (`report` or `block`), and the number of managed/owned files.
@@ -78,21 +78,21 @@ Output includes: feature name, enabled/disabled status, mode (`report` or `block
 
 ### `remove <feature>`
 
-Removes a feature from the repo. Deletes managed files and removes the feature entry from `repo-harness.json`. Owned files (your policy) are **not** deleted — they remain in the repo.
+Removes a feature from the repo. Deletes managed files and removes the feature entry from `gatekit.json`. Owned files (your policy) are **not** deleted — they remain in the repo.
 
 ```bash
-npx repo-harness remove quality
+npx gatekit remove quality
 ```
 
 ---
 
-## `repo-harness.json` schema
+## `gatekit.json` schema
 
 The manifest lives at the repo root. A `$schema` field points to the published JSON Schema for editor autocompletion.
 
 ```json
 {
-  "$schema": "https://paulcailly.github.io/repo-harness/schema.json",
+  "$schema": "https://paulcailly.github.io/gatekit/schema.json",
   "version": "1",
   "packageManager": "pnpm",
   "paths": {
@@ -147,4 +147,4 @@ managed file, locally edited  →  new version placed as <file>.harness-new
 owned file                    →  never touched (not even read by `update`)
 ```
 
-After an update that produced `.harness-new` files, run `npx repo-harness diff` to see what changed upstream. Then manually merge the upstream changes from `<file>.harness-new` into your edited file and delete the `.harness-new` file. Finally, update the `sha` for that file in `repo-harness.json` to match the new on-disk content — once the recorded SHA matches the file on disk, `update` will treat it as unmodified and overwrite cleanly on the next run.
+After an update that produced `.harness-new` files, run `npx gatekit diff` to see what changed upstream. Then manually merge the upstream changes from `<file>.harness-new` into your edited file and delete the `.harness-new` file. Finally, update the `sha` for that file in `gatekit.json` to match the new on-disk content — once the recorded SHA matches the file on disk, `update` will treat it as unmodified and overwrite cleanly on the next run.

@@ -127,5 +127,5 @@ The bot requires `OPENROUTER_API_KEY` to be set.
 ## Install
 
 ```bash
-npx repo-harness add compliance
+npx gatekit add compliance
 ```

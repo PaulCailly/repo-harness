@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://paulcailly.github.io/repo-harness/schema.json",
-  "title": "repo-harness manifest",
-  "description": "Schema for repo-harness.json — the manifest file that tracks installed gates and managed/owned files.",
+  "$id": "https://paulcailly.github.io/gatekit/schema.json",
+  "title": "gatekit manifest",
+  "description": "Schema for gatekit.json — the manifest file that tracks installed gates and managed/owned files.",
   "type": "object",
   "required": ["version"],
   "additionalProperties": false,
@@ -23,7 +23,7 @@
     },
     "paths": {
       "type": "object",
-      "description": "Directory paths where repo-harness files are vendored",
+      "description": "Directory paths where gatekit files are vendored",
       "additionalProperties": false,
       "properties": {
         "scripts": {
