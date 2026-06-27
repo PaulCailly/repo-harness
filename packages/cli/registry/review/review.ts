@@ -72,7 +72,7 @@ const REVIEW_SCHEMA = {
             },
           },
         },
-        required: ["path", "line", "severity", "confidence", "category", "title", "description", "impact", "fixes"],
+        required: ["path", "line", "severity", "confidence", "category", "title", "description", "impact"],
       },
     },
   },

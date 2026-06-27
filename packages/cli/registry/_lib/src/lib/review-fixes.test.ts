@@ -54,3 +54,19 @@ test("plain snippet gets plain fence", () => {
   assert.ok(result.includes("```\n"), "expected plain fence for non-JSX snippet");
   assert.ok(!result.includes("```tsx"), "should NOT have tsx fence for plain snippet");
 });
+
+test("snippet containing triple backticks gets a longer outer fence", () => {
+  const mdSnippet = "```js\nconst x = 1\n```";
+  const result = renderFixApproaches([
+    {
+      title: "Fence",
+      description: "Snippet with embedded backticks",
+      snippet: mdSnippet,
+      prompt: "wrap in a fence",
+    },
+  ]);
+  // Content has runs of 3 backticks → outer fence must use 4+ ticks
+  assert.ok(result.includes("````"), "expected 4-tick outer fence when snippet contains ```");
+  // Snippet content must appear verbatim (inner backticks not breaking the block)
+  assert.ok(result.includes(mdSnippet), "snippet content must appear verbatim inside the fence");
+});

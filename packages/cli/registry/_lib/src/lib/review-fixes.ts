@@ -1,4 +1,18 @@
 import type { FixApproach } from "./types.js";
+import { details } from "./markdown.js";
+
+/**
+ * Compute a safe Markdown code fence: N backticks where N is strictly greater
+ * than the longest contiguous run of backticks in `content`, minimum 3.
+ * This matches GitHub's fenced-code-block rule so inner backtick runs cannot
+ * terminate the outer fence early.
+ */
+function safeFence(lang: string, content: string): [open: string, close: string] {
+  const longest = Math.max(0, ...(content.match(/`+/g) ?? []).map((r) => r.length));
+  const n = Math.max(3, longest + 1);
+  const ticks = "`".repeat(n);
+  return [`${ticks}${lang}`, ticks];
+}
 
 /**
  * Heuristic: does the snippet look like TSX/JSX?
@@ -19,13 +33,13 @@ export function renderFixApproaches(fixes: FixApproach[]): string {
 
   for (let i = 0; i < fixes.length; i++) {
     const f = fixes[i];
-    const fence = looksLikeTsx(f.snippet) ? "```tsx" : "```";
+    const lang = looksLikeTsx(f.snippet) ? "tsx" : "";
+    const [openFence, closeFence] = safeFence(lang, f.snippet);
+    const [promptOpen, promptClose] = safeFence("", f.prompt);
 
     parts.push(`**${f.title}** — ${f.description}`);
-    parts.push(`${fence}\n${f.snippet}\n\`\`\``);
-    parts.push(
-      `<details><summary>📋 Copy as prompt</summary>\n\n\`\`\`\n${f.prompt}\n\`\`\`\n</details>`,
-    );
+    parts.push(`${openFence}\n${f.snippet}\n${closeFence}`);
+    parts.push(details("📋 Copy as prompt", `${promptOpen}\n${f.prompt}\n${promptClose}`));
 
     if (i < fixes.length - 1) parts.push("");
   }
