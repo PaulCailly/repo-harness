@@ -103,7 +103,8 @@
         { "src": "qa/QA-MEMORY.md",                       "dest": "{sentinel}/QA-MEMORY.md",                     "type": "owned" }
       ],
       "workflows": [
-        { "src": "qa/qa.yml", "dest": ".github/workflows/qa.yml", "type": "managed" }
+        { "src": "qa/qa.yml",                  "dest": ".github/workflows/qa.yml",                  "type": "managed" },
+        { "src": "qa/qa-map-freshness.yml",     "dest": ".github/workflows/qa-map-freshness.yml",     "type": "managed" }
       ]
     },
     "release-notes": {
