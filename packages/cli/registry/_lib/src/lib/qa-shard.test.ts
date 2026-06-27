@@ -1,9 +1,22 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { mergeShards, buildAggregateReport, buildShardResult, type ShardResult } from "./qa-shard.js";
-import { loadQaMap } from "./qa-map.js";
+import type { QaMap } from "./qa-map.js";
 
-const map = loadQaMap();
+// Inline fixture — keeps engine tests self-contained in the registry (no consumer bible needed).
+const map: QaMap = {
+  locales: ["en"],
+  routes: [
+    { path: "/a", section: "a", module: null, domain: "d1", preconditions: [] },
+    { path: "/b", section: "b", module: null, domain: "d2", preconditions: [] },
+  ],
+  domains: [
+    { key: "d1", label: "D1", routes: ["/a"], preconditions: [] },
+    { key: "d2", label: "D2", routes: ["/b"], preconditions: [] },
+  ],
+  outOfScope: [],
+  enabledModules: [],
+};
 const dk = map.domains.map((d) => d.key);
 
 function shard(domain: string, visited: string[], findings: any[] = [], ok = true, reason?: string): ShardResult {

@@ -38,8 +38,8 @@ import {
   type QaFinding,
   type TurnResult,
 } from "./qa-core.js";
-import { loadQaMap, coverageFor } from "./qa-map.js";
-import type { Coverage } from "./qa-map.js";
+import { coverageFor } from "./qa-map.js";
+import type { Coverage, QaMap } from "./qa-map.js";
 
 // ---- parseQaCommand ----
 
@@ -740,12 +740,24 @@ test("classifyLocale with empty or absent interpolationLeaks adds no interpolati
 // ---- domainStatus — failed shard in coverage table ----
 
 test("buildReport marks a failed domain shard in the coverage table", () => {
-  const map = loadQaMap();
-  const dk = map.domains.map((d) => d.key);
+  // Inline fixture — no consumer bible needed; exercises the shard-status rendering path.
+  const FIXTURE_MAP: QaMap = {
+    locales: ["en"],
+    routes: [
+      { path: "/a", section: "a", module: null, domain: "d1", preconditions: [] },
+      { path: "/b", section: "b", module: null, domain: "d2", preconditions: [] },
+    ],
+    domains: [
+      { key: "d1", label: "D1", routes: ["/a"], preconditions: [] },
+      { key: "d2", label: "D2", routes: ["/b"], preconditions: [] },
+    ],
+    outOfScope: [],
+    enabledModules: [],
+  };
   const body = buildReport({
     mode: "full", targetUrl: "https://x.app", findings: [], turns: 0, marker: "<!-- qa:report -->",
-    coverage: coverageFor(map, []),
-    domainStatus: [{ domain: dk[0], ok: false, reason: "shard timed out" }],
+    coverage: coverageFor(FIXTURE_MAP, []),
+    domainStatus: [{ domain: "d1", ok: false, reason: "shard timed out" }],
   });
   assert.match(body, /shard timed out/);
   assert.match(body, /✗/);
