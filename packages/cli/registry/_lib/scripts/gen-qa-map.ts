@@ -1,19 +1,26 @@
 /**
- * Generate the QA route-map skeleton from the app's Next.js file-based routes.
- * Scans `../../src/pages/[locale]/**` (relative to the sentinel cwd) and the
- * `../../public/locales` dirs, emitting one canonical route per page plus the
- * shipped locale list. The output is committed as `src/lib/qa-map.generated.json`
- * and validated by a freshness test — so adding an app route without regenerating
- * fails CI. Run via `npm run qa:gen-map`.
+ * Generate the QA route-map skeleton.  Now config-driven: reads the consumer's
+ * `gatekit.json` `qa` stanza and dispatches via extractRoutes().
+ * Falls back to the original next-pages scan when no gatekit.json is found.
+ *
+ * The output is committed as `src/lib/qa-map.generated.json` and validated by
+ * a freshness test — so adding a route without regenerating fails CI.
+ * Run via `npm run qa:gen-map`.
  */
-import { readdirSync, writeFileSync, existsSync } from "node:fs";
+import { readdirSync, writeFileSync, readFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
+import { extractRoutes, type QaConfig } from "../src/lib/route-extract.js";
+
 const SENTINEL_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const REPO_ROOT = path.resolve(SENTINEL_DIR, "../../../..");
 export const PAGES_DIR = path.resolve(SENTINEL_DIR, "../../src/pages");
 const LOCALES_DIR = path.resolve(SENTINEL_DIR, "../../public/locales");
 const OUT = path.resolve(SENTINEL_DIR, "src/lib/qa-map.generated.json");
+
+export type { QaConfig };
+export { extractRoutes };
 
 export interface GeneratedRoute {
   path: string;
@@ -27,7 +34,20 @@ export interface GeneratedMap {
   routes: GeneratedRoute[];
 }
 
-/** Files that are not navigable routes. */
+/** Load QA config from the consumer's gatekit.json, if present. */
+function loadGatekitQaConfig(): QaConfig | null {
+  const gkPath = path.join(REPO_ROOT, "gatekit.json");
+  if (!existsSync(gkPath)) return null;
+  try {
+    const raw = JSON.parse(readFileSync(gkPath, "utf8")) as Record<string, unknown>;
+    if (!raw.qa || typeof raw.qa !== "object") return null;
+    return raw.qa as QaConfig;
+  } catch {
+    return null;
+  }
+}
+
+/** Files that are not navigable routes (next-pages fallback). */
 const SKIP = new Set(["_app", "_document", "_error", "404"]);
 
 function walk(dir: string, rel = ""): string[] {
@@ -43,19 +63,24 @@ function walk(dir: string, rel = ""): string[] {
   return out;
 }
 
-/** `[locale]/modules/cooling/index.tsx` → `/modules/cooling`; returns null for
- *  non-route or non-`[locale]` files. */
 function toRoute(relFile: string): string | null {
-  if (!relFile.startsWith("[locale]/")) return null; // canonical set is locale-prefixed
+  if (!relFile.startsWith("[locale]/")) return null;
   let p = relFile.slice("[locale]/".length).replace(/\.tsx?$/, "");
   if (SKIP.has(p)) return null;
   p = p.replace(/\/index$/, "").replace(/^index$/, "");
-  // Normalize any dynamic segment `[param]` → `:param` (defensive; none today).
   p = p.replace(/\[([^\]]+)\]/g, ":$1");
   return "/" + p;
 }
 
 export function generateMap(): GeneratedMap {
+  const qaConfig = loadGatekitQaConfig();
+
+  if (qaConfig) {
+    const generated = extractRoutes(REPO_ROOT, qaConfig);
+    return { generatedAt: null, locales: generated.locales, routes: generated.routes };
+  }
+
+  // ── backward-compatible next-pages fallback ──────────────────────────────
   const files = existsSync(PAGES_DIR) ? walk(PAGES_DIR) : [];
   const seen = new Map<string, GeneratedRoute>();
   for (const f of files) {
@@ -84,7 +109,6 @@ function main(): void {
   console.log(`Wrote ${map.routes.length} routes, ${map.locales.length} locales → ${path.relative(SENTINEL_DIR, OUT)}`);
 }
 
-// Run only when invoked directly (not when imported by the freshness test).
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   main();
 }
