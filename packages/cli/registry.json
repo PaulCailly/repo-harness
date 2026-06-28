@@ -1,5 +1,5 @@
 {
-  "version": "0.6.5",
+  "version": "0.6.6",
   "items": {
     "_lib": {
       "description": "shared sentinel lib",
@@ -330,6 +330,11 @@
         {
           "src": "qa/QA-MEMORY.md",
           "dest": "{sentinel}/QA-MEMORY.md",
+          "type": "owned"
+        },
+        {
+          "src": "qa/qa-seed.ts",
+          "dest": "{sentinel}/src/qa-seed.ts",
           "type": "owned"
         }
       ],

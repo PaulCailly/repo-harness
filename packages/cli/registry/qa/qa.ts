@@ -16,7 +16,7 @@
  * drives a browser against the already-deployed preview — it never executes PR
  * code on the runner.
  */
-import { readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
@@ -28,12 +28,14 @@ import {
   continueInteraction,
   finalText,
   functionCalls,
+  isSafetyBlock,
   startInteraction,
   usageOf,
   type FunctionResult,
   type FunctionTool,
   type InteractionInput,
 } from "./lib/gemini.js";
+import { runSeed, seedNotesBlock, type SeedCtx, type SeedFn } from "./lib/qa-seed.js";
 import { captureState, evaluateLocale, executeAction } from "./lib/browser.js";
 import { uploadVideo } from "./lib/recorder.js";
 import { parseLedger, readMemory, synthesizeMemory, upsertLedger, writeMemory } from "./lib/qa-memory.js";
@@ -215,6 +217,17 @@ function steeringBlock(map: QaMap, alreadyVisited: string[], focus: string | nul
     "If a route is genuinely unreachable for you, record a finding and move on.",
     ...lines,
   ].join("\n");
+}
+
+/** Dynamically load the consumer's owned qa-seed.ts (if present) and return its
+ *  exported `seed` function. Returns null if absent — no owned seed is fine. */
+async function loadOwnedSeed(): Promise<SeedFn | null> {
+  try {
+    const mod = (await import("./qa-seed.js")) as { seed?: SeedFn };
+    return typeof mod.seed === "function" ? mod.seed : null;
+  } catch {
+    return null; // no owned seed present
+  }
 }
 
 function systemInstruction(
@@ -402,6 +415,33 @@ async function explore(
     // already-authenticated page and never sees the credentials.
     if (creds) await signIn(page, creds);
 
+    // Optional owned pre-seed: populate app state so data-dependent routes are
+    // reachable. Enabled by gatekit.json `qa.seed`; the owned qa-seed.ts is loaded
+    // dynamically so its absence is fine. Never throws (runSeed swallows failures).
+    let seedNotes: string[] = [];
+    {
+      let qaSeedEnabled = false;
+      let dir = process.cwd();
+      while (true) {
+        if (existsSync(path.join(dir, "gatekit.json"))) {
+          try {
+            const raw = JSON.parse(readFileSync(path.join(dir, "gatekit.json"), "utf8")) as Record<string, unknown>;
+            qaSeedEnabled = (raw.qa as Record<string, unknown> | undefined)?.seed === true;
+          } catch { /* ignore malformed gatekit.json */ }
+          break;
+        }
+        const parent = path.dirname(dir);
+        if (parent === dir) break;
+        dir = parent;
+      }
+      if (qaSeedEnabled) {
+        const seedFn = await loadOwnedSeed();
+        const routesInScope = map?.domains.find((d) => d.key === focus)?.routes ?? [];
+        const seedCtx: SeedCtx = { baseUrl: targetUrl, mode, focus, routes: routesInScope };
+        seedNotes = await runSeed(seedFn, page, seedCtx, (m) => core.info(m));
+      }
+    }
+
     const first = await captureState(page);
     let steering = "";
     if (map) {
@@ -411,6 +451,7 @@ async function explore(
         core.warning(`Steering block failed; continuing without it: ${err instanceof Error ? err.message : String(err)}`);
       }
     }
+    steering += seedNotesBlock(seedNotes);
     let interaction = await startInteraction(
       systemInstruction(mode, scopeLine, creds, memory, steering, prContext),
       [
@@ -513,7 +554,24 @@ async function explore(
       // would never inspect (it exits on the next condition check) — that call
       // is pure wasted Gemini + image cost, multiplied over a /qa all sweep.
       if (turn < budget - 1) {
-        interaction = await continueInteraction(interaction.id, withState as InteractionInput[], [REPORT_FINDING_TOOL]);
+        let next: Awaited<ReturnType<typeof continueInteraction>>;
+        try {
+          next = await continueInteraction(interaction.id, withState as InteractionInput[], [REPORT_FINDING_TOOL]);
+        } catch (err) {
+          if (isSafetyBlock(err)) {
+            core.info(`Turn ${turn}: action blocked by a Gemini safety policy — skipping it and continuing.`);
+            // Feed the block back as a function result so the agent picks a different path.
+            const safetyNote: InteractionInput = { type: "text", text: "That action was blocked by a safety policy. Do not retry it; explore a different part of the app." };
+            next = await continueInteraction(
+              interaction.id,
+              [...(withState as InteractionInput[]), safetyNote],
+              [REPORT_FINDING_TOOL],
+            );
+          } else {
+            throw err;
+          }
+        }
+        interaction = next;
         const u = usageOf(interaction);
         inputTokens += u.inputTokens;
         outputTokens += u.outputTokens;
