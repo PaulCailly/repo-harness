@@ -46,3 +46,40 @@ test("glob: matched files → routes via strip rule", () => {
   const r = extractRoutes(d, { routing: "glob", glob: "src/screens/*.screen.tsx" });
   assert.deepEqual(r.routes.map((x) => x.path), ["/coach"]);
 });
+
+test("code-router: extracts path: literals, derives section, dedups + sorts", () => {
+  const d = tmp();
+  mkdirSync(join(d, "src"), { recursive: true });
+  writeFileSync(
+    join(d, "src/router.tsx"),
+    `createRoute({ path: "/log" }); createRoute({ path: '/log/live' });
+     createRoute({ path: "/" }); createRoute({ path: "/log" });`,
+  );
+  const r = extractRoutes(d, { routing: "code-router", routerFiles: ["src/router.tsx"] });
+  assert.deepEqual(r.routes.map((x) => x.path), ["/", "/log", "/log/live"]);
+  assert.equal(r.routes.find((x) => x.path === "/")!.section, "root");
+  assert.equal(r.routes.find((x) => x.path === "/log/live")!.section, "log");
+});
+
+test("code-router: exclude filters drop non-app paths", () => {
+  const d = tmp();
+  writeFileSync(join(d, "router.tsx"), `path: "/coach"; path: "/api/coach"; path: "/auth/v1/token";`);
+  const r = extractRoutes(d, {
+    routing: "code-router",
+    routerFiles: ["router.tsx"],
+    exclude: ["^/api", "^/auth"],
+  });
+  assert.deepEqual(r.routes.map((x) => x.path), ["/coach"]);
+});
+
+test("code-router: missing router file yields no routes (no throw)", () => {
+  const d = tmp();
+  const r = extractRoutes(d, { routing: "code-router", routerFiles: ["nope.tsx"] });
+  assert.deepEqual(r.routes, []);
+});
+
+test("auto routing returns an empty skeleton from extractRoutes (resolved upstream)", () => {
+  const d = tmp();
+  const r = extractRoutes(d, { routing: "auto" });
+  assert.deepEqual(r.routes, []);
+});

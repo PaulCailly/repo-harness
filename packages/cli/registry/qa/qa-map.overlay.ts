@@ -15,7 +15,7 @@
 // gatekit.json qa config block (add to your repo root gatekit.json):
 //
 //   "qa": {
-//     "routing": "next-pages",   // next-pages | next-app | glob | opus-infer
+//     "routing": "next-pages",   // auto | next-pages | next-app | glob | code-router | llm
 //     "pagesDir":   "src/pages", // for next-pages (default: "pages")
 //     "appDir":     "app",       // for next-app
 //     "localesDir": "public/locales", // optional; sub-dirs = locale codes

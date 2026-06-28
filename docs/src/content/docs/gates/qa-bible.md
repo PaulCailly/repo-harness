@@ -94,14 +94,45 @@ Add a `qa` block to your root `gatekit.json` to control how routes are extracted
 
 | Key | Values | Notes |
 |-----|--------|-------|
-| `routing` | `next-pages` · `next-app` · `glob` · `opus-infer` | Extractor strategy for `qa:gen-map` |
+| `routing` | `auto` · `next-pages` · `next-app` · `glob` · `code-router` · `llm` | Extractor strategy for `qa:gen-map` |
 | `pagesDir` | path | Used with `next-pages` (default: `"pages"`) |
 | `appDir` | path | Used with `next-app` |
 | `glob` | glob pattern | Used with `glob` strategy |
+| `routerFiles` | file paths | Used with `code-router`: files containing route definitions |
+| `pathPattern` | regex | `code-router`: capture group 1 = route path (default `path: "…"`) |
+| `exclude` | regexes | `code-router`: drop paths matching any of these |
 | `localesDir` | path | Sub-directory names become locale codes |
 | `modulePrefix` | path prefix | Routes under this prefix get a module tag |
 | `bibleModel` | OpenRouter model slug | Model used by `qa:gen-bible`; defaults to `anthropic/claude-opus-4` |
 | `docsForBible` | file paths | Extra context files sent to Opus when drafting the overlay |
+
+### `routing: "auto"` — adaptive detection (recommended starting point)
+
+`auto` is a **one-time bootstrap**. On the first `qa:gen-bible`, Opus analyzes the
+stack (`package.json`, file tree, candidate router files) and **rewrites the `qa`
+block** in `gatekit.json` to a concrete strategy it detected — which you can review
+and tweak. Every subsequent `qa:gen-map` then runs that concrete strategy
+deterministically (free, CI-freshness-checked). When no deterministic rule fits an
+irregular router, detection persists `routing: "llm"` with the LLM-derived
+routes (the freshness gate is skipped for that mode).
+
+### `code-router` — code-defined routers (TanStack, React Router)
+
+For apps whose routes are declared in code rather than the filesystem:
+
+```jsonc
+"qa": {
+  "routing": "code-router",
+  "routerFiles": ["src/presentation/app/router.tsx"],
+  "pathPattern": "path:\\s*['\"]([^'\"]+)['\"]",   // default; override if needed
+  "exclude": ["^/api", "^/auth"]
+}
+```
+
+It scans each `routerFiles` entry with `pathPattern` (capture group 1 = the route
+path), drops paths matching any `exclude` regex, and derives `section`/`module`
+the same way as the other strategies. Deterministic — so the CI freshness check
+applies. This is what `auto` resolves to for a TanStack/React-Router app.
 
 ---
 
