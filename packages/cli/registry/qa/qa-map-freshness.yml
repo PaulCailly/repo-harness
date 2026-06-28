@@ -62,7 +62,7 @@ jobs:
       - name: Check qa-map.generated.json is up to date
         if: steps.routing.outputs.routing != 'llm' && steps.routing.outputs.routing != 'auto'
         run: |
-          if ! git diff --exit-status -- '*qa-map.generated.json'; then
+          if ! git diff --exit-code -- '*qa-map.generated.json'; then
             echo ""
             echo "::error::qa-map.generated.json is stale — a route was added or"
             echo "::error::removed without regenerating the map."
