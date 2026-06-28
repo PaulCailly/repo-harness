@@ -146,10 +146,30 @@ function scopedRoutes(map: QaMap, domain?: string): QaRoute[] {
   return map.routes.filter((r) => inDenominator(r, map) && inDomain(r));
 }
 
+/**
+ * True when a bible route is satisfied by a visited path. A route with a `$param`
+ * segment (e.g. `/session/$sessionId`) is a PATTERN: each `$seg` matches any single
+ * concrete segment, so a visited `/session/abc123` credits it. Without this, dynamic
+ * routes are uncoverable — a real id never equals the literal `$param`.
+ */
+export function routeMatchesVisited(routePath: string, visitedKeys: Set<string>): boolean {
+  if (!routePath.includes("$")) return visitedKeys.has(routePath);
+  const re = new RegExp(
+    "^" +
+      routePath
+        .split("/")
+        .map((seg) => (seg.startsWith("$") ? "[^/]+" : seg.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")))
+        .join("/") +
+      "$",
+  );
+  for (const v of visitedKeys) if (re.test(v)) return true;
+  return false;
+}
+
 export function coverageFor(map: QaMap, visited: string[], opts: CoverageOpts = {}): Coverage {
   const visitedKeys = new Set(visited.map((v) => normalizePath(v, map.locales)));
   const scoped = scopedRoutes(map, opts.domain);
-  const isCovered = (r: QaRoute) => visitedKeys.has(r.path);
+  const isCovered = (r: QaRoute) => routeMatchesVisited(r.path, visitedKeys);
 
   const coveredRoutes = scoped.filter(isCovered);
   const overall = { covered: coveredRoutes.length, total: scoped.length, pct: pct(coveredRoutes.length, scoped.length) };
@@ -174,7 +194,7 @@ export function coverageFor(map: QaMap, visited: string[], opts: CoverageOpts = 
 /** In-scope, enabled routes not yet covered — the steering target. */
 export function unvisited(map: QaMap, visited: string[], opts: CoverageOpts = {}): QaRoute[] {
   const visitedKeys = new Set(visited.map((v) => normalizePath(v, map.locales)));
-  return scopedRoutes(map, opts.domain).filter((r) => !visitedKeys.has(r.path));
+  return scopedRoutes(map, opts.domain).filter((r) => !routeMatchesVisited(r.path, visitedKeys));
 }
 
 export function routesForDomain(map: QaMap, domainKey: string): QaRoute[] {
