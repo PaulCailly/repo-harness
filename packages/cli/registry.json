@@ -115,6 +115,11 @@
           "type": "managed"
         },
         {
+          "src": "_lib/src/lib/qa-seed.ts",
+          "dest": "{sentinel}/src/lib/qa-seed.ts",
+          "type": "managed"
+        },
+        {
           "src": "_lib/package.json",
           "dest": "{sentinel}/package.json",
           "type": "managed"
