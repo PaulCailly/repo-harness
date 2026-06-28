@@ -71,7 +71,7 @@ export const QA_CONFIG = {
     "user_consent_management",
     "legal_terms_and_agreements",
   ],
-  budgets: { scoped: 40, full: 900, focus: 60, i18n: 20, offline: 50 } as Record<QaMode, number>,
+  budgets: { scoped: 40, full: 900, focus: 120, i18n: 20, offline: 50 } as Record<QaMode, number>,
   /** Same screen seen this many times in a row → the agent is stuck/looping. */
   stuckThreshold: 4,
   /** Gemini 3.5 Flash computer-use pricing, USD per 1M tokens — an ESTIMATE for
