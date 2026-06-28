@@ -96,10 +96,10 @@ export function generateMap(): GeneratedMap {
   const qaConfig = loadGatekitQaConfig();
 
   if (qaConfig) {
-    // opus-infer has no deterministic source — its routes come from the Opus
+    // llm has no deterministic source — its routes come from the LLM
     // generator (gen-bible) or a manual seed. Preserve the existing map so a
     // re-run is idempotent (the freshness check must not see drift-to-empty).
-    if (qaConfig.routing === "opus-infer" && existsSync(OUT)) {
+    if (qaConfig.routing === "llm" && existsSync(OUT)) {
       const existing = JSON.parse(readFileSync(OUT, "utf8")) as GeneratedFile;
       return { generatedAt: null, locales: existing.locales ?? [], routes: existing.routes ?? [] };
     }
@@ -131,15 +131,15 @@ export function generateMap(): GeneratedMap {
 }
 
 function main(): void {
-  // opus-infer maps are maintained by gen-bible (Opus) / manual seed, not by a
+  // llm maps are maintained by gen-bible / manual seed, not by a
   // deterministic scan. Leave the file BYTE-untouched so the freshness gate
   // (git diff) can never trip on a re-serialization difference.
   const cfg = loadGatekitQaConfig();
-  if (cfg && (cfg.routing === "opus-infer" || cfg.routing === "auto") && existsSync(OUT)) {
+  if (cfg && (cfg.routing === "llm" || cfg.routing === "auto") && existsSync(OUT)) {
     const why =
       cfg.routing === "auto"
         ? "routing=auto not yet resolved — run qa:gen-bible first"
-        : "opus-infer: Opus-maintained map";
+        : "llm: model-maintained (gen-bible)";
     console.log(`${why} — preserving ${path.relative(SENTINEL_DIR, OUT)}`);
     return;
   }

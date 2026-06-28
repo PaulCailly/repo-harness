@@ -134,7 +134,7 @@ export function resolveAuto(
   if (fallback.length === 0) {
     throw new Error("resolveAuto: detection produced no routes (strategy empty and no LLM routes)");
   }
-  return { routes: fallback, persist: { ...detection.strategy, routing: "opus-infer" } as QaConfig };
+  return { routes: fallback, persist: { ...detection.strategy, routing: "llm" } as QaConfig };
 }
 
 export async function detectStack(

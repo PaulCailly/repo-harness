@@ -11,7 +11,7 @@ import type { GeneratedRoute } from "./qa-map.js";
 // ── public types ─────────────────────────────────────────────────────────────
 
 export interface QaConfig {
-  routing: "next-pages" | "next-app" | "glob" | "code-router" | "opus-infer" | "auto";
+  routing: "next-pages" | "next-app" | "glob" | "code-router" | "llm" | "auto";
   /** next-pages: root of the pages directory (e.g. "src/pages") */
   pagesDir?: string;
   /** next-app: root of the app directory (e.g. "app") */
@@ -212,7 +212,7 @@ export function extractRoutes(rootDir: string, cfg: QaConfig): GeneratedFile {
     case "code-router":
       return { generatedAt: null, locales, routes: extractCodeRouter(rootDir, cfg) };
 
-    case "opus-infer":
+    case "llm":
     case "auto":
       // Routes come from the LLM step — return the skeleton only.
       return { generatedAt: null, locales, routes: [] };

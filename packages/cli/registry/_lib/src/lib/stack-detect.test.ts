@@ -75,7 +75,7 @@ test("resolveAuto falls back to LLM routes when strategy yields empty", () => {
   }));
   const r = resolveAuto(root, detection, {});
   assert.deepEqual(r.routes.map((x) => x.path), ["/fallback"]);
-  assert.equal(r.persist.routing, "opus-infer");
+  assert.equal(r.persist.routing, "llm");
 });
 
 test("resolveAuto throws when both strategy and routes are empty", () => {
