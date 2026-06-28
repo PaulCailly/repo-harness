@@ -118,7 +118,7 @@ test("loadQaMap loads the committed skeleton + real overlay without throwing", (
   assert.ok(Array.isArray(map.domains));
 });
 
-import { coverageFor, unvisited, normalizePath, routesForDomain } from "./qa-map.js";
+import { coverageFor, unvisited, normalizePath, routesForDomain, routeMatchesVisited } from "./qa-map.js";
 
 test("normalizePath strips a known locale prefix and trailing slash", () => {
   assert.equal(normalizePath("/en/modules/cooling", ["en", "fr"]), "/modules/cooling");
@@ -183,4 +183,44 @@ test("routesForDomain returns the domain's routes", () => {
     routesForDomain(COV_MAP, "cold-chain").map((r) => r.path).sort(),
     ["/modules/cooling", "/modules/freezing"],
   );
+});
+
+test("routeMatchesVisited: a $param route is matched by a concrete visited path", () => {
+  const visited = new Set(["/session/abc123", "/log/running"]);
+  assert.equal(routeMatchesVisited("/session/$sessionId", visited), true);
+  assert.equal(routeMatchesVisited("/session/$sessionId/edit", visited), false); // not visited
+  assert.equal(routeMatchesVisited("/log/$sportId", visited), true);
+});
+
+test("routeMatchesVisited: a $param route needs exactly one segment (no greedy match)", () => {
+  const visited = new Set(["/session/abc/extra"]);
+  assert.equal(routeMatchesVisited("/session/$sessionId", visited), false);
+});
+
+test("routeMatchesVisited: static routes still use exact match", () => {
+  const visited = new Set(["/log", "/session/x"]);
+  assert.equal(routeMatchesVisited("/log", visited), true);
+  assert.equal(routeMatchesVisited("/log/past", visited), false);
+});
+
+test("coverageFor credits a $param route when a concrete instance was visited", () => {
+  const generated = {
+    generatedAt: null,
+    locales: [],
+    routes: [
+      { path: "/log", section: "log", module: null },
+      { path: "/session/$sessionId", section: "session", module: null },
+    ],
+  };
+  const overlay: QaOverlay = {
+    domains: [{ key: "log", label: "Log", routes: ["/log", "/session/$sessionId"], preconditions: [] }],
+    routePreconditions: {},
+    outOfScope: [],
+    enabledModules: [],
+  };
+  const map = mergeQaMap(generated, overlay);
+  const cov = coverageFor(map, ["/log", "/session/abc123"]);
+  assert.equal(cov.overall.covered, 2);
+  assert.equal(cov.overall.total, 2);
+  assert.ok(cov.coveredPaths.includes("/session/$sessionId"));
 });
