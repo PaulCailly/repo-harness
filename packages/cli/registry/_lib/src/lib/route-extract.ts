@@ -3,7 +3,7 @@
  * Dispatches by QaConfig.routing to produce a GeneratedFile (same shape as
  * qa-map.generated.json) without touching the network or any LLM.
  */
-import { readdirSync, existsSync } from "node:fs";
+import { readdirSync, existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 
 import type { GeneratedRoute } from "./qa-map.js";
@@ -11,13 +11,19 @@ import type { GeneratedRoute } from "./qa-map.js";
 // ── public types ─────────────────────────────────────────────────────────────
 
 export interface QaConfig {
-  routing: "next-pages" | "next-app" | "glob" | "opus-infer";
+  routing: "next-pages" | "next-app" | "glob" | "code-router" | "opus-infer" | "auto";
   /** next-pages: root of the pages directory (e.g. "src/pages") */
   pagesDir?: string;
   /** next-app: root of the app directory (e.g. "app") */
   appDir?: string;
   /** glob: pattern in the form "dir/*.suffix" */
   glob?: string;
+  /** code-router: one or more files containing route definitions */
+  routerFiles?: string[];
+  /** code-router: regex with capture group 1 = the route path (default below) */
+  pathPattern?: string;
+  /** code-router: regexes; a path matching any is dropped */
+  exclude?: string[];
   /** Directory whose sub-directory names are locale codes (e.g. "public/locales") */
   localesDir?: string | null;
   /** First path segment that triggers module tagging (default "/modules") */
@@ -161,6 +167,33 @@ function extractGlob(rootDir: string, cfg: QaConfig): GeneratedRoute[] {
   return routes.sort((a, b) => a.path.localeCompare(b.path, "en"));
 }
 
+/** Default pattern matches `path: "..."` / `path: '...'` route literals. */
+export const DEFAULT_CODE_ROUTER_PATTERN = "path:\\s*['\"]([^'\"]+)['\"]";
+
+/**
+ * code-router: scan one or more router/source files for route path literals.
+ * For code-defined routers (TanStack, React Router) that are not file-routed.
+ */
+function extractCodeRouter(rootDir: string, cfg: QaConfig): GeneratedRoute[] {
+  const files = cfg.routerFiles ?? [];
+  const re = new RegExp(cfg.pathPattern ?? DEFAULT_CODE_ROUTER_PATTERN, "g");
+  const excludes = (cfg.exclude ?? []).map((e) => new RegExp(e));
+  const seen = new Map<string, GeneratedRoute>();
+  for (const rel of files) {
+    const abs = path.join(rootDir, rel);
+    if (!existsSync(abs)) continue;
+    const text = readFileSync(abs, "utf8");
+    for (const m of text.matchAll(re)) {
+      const routePath = m[1];
+      if (!routePath || !routePath.startsWith("/")) continue;
+      if (excludes.some((rx) => rx.test(routePath))) continue;
+      const { section, module } = sectionAndModule(routePath, cfg.modulePrefix);
+      seen.set(routePath, { path: routePath, section, module });
+    }
+  }
+  return [...seen.values()].sort((a, b) => a.path.localeCompare(b.path, "en"));
+}
+
 // ── public API ────────────────────────────────────────────────────────────────
 
 export function extractRoutes(rootDir: string, cfg: QaConfig): GeneratedFile {
@@ -176,7 +209,11 @@ export function extractRoutes(rootDir: string, cfg: QaConfig): GeneratedFile {
     case "glob":
       return { generatedAt: null, locales, routes: extractGlob(rootDir, cfg) };
 
+    case "code-router":
+      return { generatedAt: null, locales, routes: extractCodeRouter(rootDir, cfg) };
+
     case "opus-infer":
+    case "auto":
       // Routes come from the LLM step — return the skeleton only.
       return { generatedAt: null, locales, routes: [] };
 
